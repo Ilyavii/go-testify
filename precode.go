@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"strings"
 )
@@ -42,4 +43,14 @@ func mainHandle(w http.ResponseWriter, req *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(answer))
+}
+
+func TestRequest(url string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest("GET", url, nil) // здесь нужно создать запрос к сервису
+
+	responseRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(mainHandle)
+	handler.ServeHTTP(responseRecorder, req)
+
+	return responseRecorder
 }

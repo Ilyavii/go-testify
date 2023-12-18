@@ -1,21 +1,45 @@
-package main_test
+package main
 
 import (
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
+func TestMainHandlerCorrect(t *testing.T) {
+	responseRecorder := TestRequest("/cafe?count=2&city=moscow")
+
+	expectedCode := http.StatusOK
+	expectedCount := 2
+
+	receivedCount := strings.Split(responseRecorder.Body.String(), ",")
+
+	require.NotEmpty(t, responseRecorder.Body)
+	assert.Equal(t, expectedCode, responseRecorder.Code)
+	assert.Len(t, receivedCount, expectedCount)
+}
+
 func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
-	totalCount := "d"
-	result := "d"
-	assert.NotEmpty(t, result)
-	assert.Equal(t, result, totalCount)
-	// req := http. // здесь нужно создать запрос к сервису
+	responseRecorder := TestRequest("/cafe?count=10&city=moscow")
 
-	// responseRecorder := httptest.NewRecorder()
-	// handler := http.HandlerFunc(mainHandle)
-	// handler.ServeHTTP(responseRecorder, req)
+	expectedCode := http.StatusOK
+	expectedCount := 4
 
-	// здесь нужно добавить необходимые проверки
+	receivedCount := strings.Split(responseRecorder.Body.String(), ",")
+
+	require.NotEmpty(t, responseRecorder.Body)
+	assert.Equal(t, expectedCode, responseRecorder.Code)
+	assert.Len(t, receivedCount, expectedCount)
+}
+
+func TestMainHandlerWhenIncorrectCity(t *testing.T) {
+	responseRecorder := TestRequest("/cafe?count=2&city=kazan")
+
+	expectedCode := http.StatusBadRequest
+
+	require.NotEmpty(t, responseRecorder.Body)
+	assert.Equal(t, expectedCode, responseRecorder.Code)
 }
